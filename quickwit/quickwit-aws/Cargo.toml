@@ -28,6 +28,7 @@ tower = { workspace = true }
 tracing = { workspace = true }
 
 quickwit-common = { workspace = true }
+aws-smithy-runtime = "1.1.2"
 
 [features]
 kinesis = ["aws-sdk-kinesis"]

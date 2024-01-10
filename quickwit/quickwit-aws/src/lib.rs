@@ -19,9 +19,11 @@
 
 use std::time::Duration;
 
+use aws_config::BehaviorVersion;
 use aws_config::retry::RetryConfig;
 pub use aws_smithy_async::rt::sleep::TokioSleep;
-use aws_smithy_client::hyper_ext;
+// use aws_smithy_client::hyper_ext;
+use aws_smithy_runtime::client::http::hyper_014::HyperConnector;
 use aws_types::region::Region;
 use hyper::client::{Client as HyperClient, HttpConnector};
 use hyper_rustls::HttpsConnectorBuilder;
@@ -54,16 +56,26 @@ pub async fn get_aws_config() -> &'static aws_config::SdkConfig {
                 .enable_http1()
                 .wrap_connector(http_connector);
 
+            let mut hyper_client_builder = HyperConnector::builder();
+
             let mut hyper_client_builder = HyperClient::builder();
             hyper_client_builder.pool_idle_timeout(Duration::from_secs(30));
+            // let connector = HttpConnector::new();
 
-            let mut smithy_connector_builder = hyper_ext::Adapter::builder();
-            smithy_connector_builder.set_hyper_builder(Some(hyper_client_builder));
+            // let client  = hyper_client_builder
 
-            let smithy_connector = smithy_connector_builder.build(https_connector);
+            // let mut smithy_connector_builder = hyper_connector::HyperConnector::builder();
+            // smithy_connector_builder.set_hyper_builder(Some(hyper_client_builder));
 
-            aws_config::from_env()
-                .http_connector(smithy_connector)
+            // let smithy_connector = smithy_connector_builder.build(https_connector);
+            // aws_smithy_runtime::client::connectors::hyper_connector::HyperConnector
+
+
+            // let config = aws_config::defaults(BehaviorVersion::v2023_11_09())
+
+
+            aws_config::defaults(BehaviorVersion::v2023_11_09()) // hardcoding config version to try and avoid unexpected behaviour changes
+                .http_client(smithy_connector_builder)
                 // Currently handle this ourselves so probably best for now to leave it as is.
                 .retry_config(RetryConfig::disabled())
                 .sleep_impl(TokioSleep::default())
